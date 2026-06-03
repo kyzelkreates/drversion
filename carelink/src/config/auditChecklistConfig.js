@@ -1,0 +1,178 @@
+// 4P3X Audit Checklist Config — Run 8
+// Defines all audit categories, required checks, blocking checks, and thresholds.
+
+export const AUDIT_CATEGORIES = [
+  {
+    id: 'routes',
+    label: 'Route Integrity',
+    description: 'Confirms every active module route has a registered page and every page is reachable.',
+    requiredChecks: ['active_routes_registered', 'no_orphan_routes', 'not_found_route_exists', 'routes_match_modules'],
+    blockingChecks: ['active_routes_registered', 'routes_match_modules'],
+    warningChecks: ['no_orphan_routes'],
+    passThreshold: 90,
+    criticalFailureConditions: ['active module has no route', 'route array is empty'],
+  },
+  {
+    id: 'moduleRegistry',
+    label: 'Module Registry',
+    description: 'Confirms module registry is complete, has no duplicates, and matches built pages.',
+    requiredChecks: ['no_duplicate_ids', 'active_modules_have_routes', 'run_to_build_values_valid', 'descriptions_present'],
+    blockingChecks: ['no_duplicate_ids', 'active_modules_have_routes'],
+    warningChecks: ['descriptions_present'],
+    passThreshold: 90,
+    criticalFailureConditions: ['duplicate module id', 'active module without route'],
+  },
+  {
+    id: 'ssot',
+    label: 'SSOT Integrity',
+    description: 'Confirms storage.js is the single source of truth and no components directly write to localStorage.',
+    requiredChecks: ['storage_js_exists', 'no_duplicate_stores', 'export_import_reset_exist', 'no_direct_localstorage_writes'],
+    blockingChecks: ['storage_js_exists', 'no_duplicate_stores'],
+    warningChecks: ['no_direct_localstorage_writes'],
+    passThreshold: 95,
+    criticalFailureConditions: ['storage.js missing', 'duplicate state store detected'],
+  },
+  {
+    id: 'stateSchema',
+    label: 'State Schema',
+    description: 'Validates top-level state shape covers all 8 runs without missing sections.',
+    requiredChecks: ['run1_state_present', 'run2_state_present', 'run3_state_present', 'run4_state_present', 'run5_state_present', 'run6_state_present', 'run7_state_present', 'run8_state_present', 'no_shape_risks'],
+    blockingChecks: ['run1_state_present'],
+    warningChecks: ['no_shape_risks'],
+    passThreshold: 85,
+    criticalFailureConditions: ['core run 1 state missing'],
+  },
+  {
+    id: 'localStorage',
+    label: 'LocalStorage Safety',
+    description: 'Verifies a single storage key, no unsafe additional keys, and no secret-like values in local state.',
+    requiredChecks: ['single_storage_key', 'no_unsafe_keys', 'no_secret_values_in_state', 'storage_fallback_exists'],
+    blockingChecks: ['no_secret_values_in_state'],
+    warningChecks: ['no_unsafe_keys'],
+    passThreshold: 90,
+    criticalFailureConditions: ['raw API key detected in localStorage'],
+  },
+  {
+    id: 'exportImport',
+    label: 'Export / Import Safety',
+    description: 'Confirms all export/import paths are sanitised and do not include raw secrets.',
+    requiredChecks: ['app_state_export_sanitised', 'blueprint_export_sanitised', 'plan_export_sanitised', 'prompt_export_sanitised', 'workspace_export_sanitised', 'export_pack_sanitised', 'import_validation_exists'],
+    blockingChecks: ['app_state_export_sanitised', 'export_pack_sanitised'],
+    warningChecks: ['import_validation_exists'],
+    passThreshold: 90,
+    criticalFailureConditions: ['export includes raw secret'],
+  },
+  {
+    id: 'secretExposure',
+    label: 'Secret Exposure',
+    description: 'Scans state, prompts, export packs, and env examples for forbidden secret names or raw API key patterns.',
+    requiredChecks: ['no_raw_api_keys_in_state', 'no_secrets_in_prompts', 'no_secrets_in_export_packs', 'env_example_placeholders_only', 'no_forbidden_secret_names_with_values'],
+    blockingChecks: ['no_raw_api_keys_in_state', 'no_secrets_in_export_packs', 'env_example_placeholders_only'],
+    warningChecks: ['no_forbidden_secret_names_with_values'],
+    passThreshold: 100,
+    criticalFailureConditions: ['raw API key detected in state', 'secret in export pack'],
+  },
+  {
+    id: 'noDemoLanguage',
+    label: 'No-Demo Language',
+    description: 'Scans product-facing content for forbidden demo/mock/fake wording and suggests production replacements.',
+    requiredChecks: ['no_demo_in_modules', 'no_demo_in_blueprints', 'no_demo_in_prompts', 'no_demo_in_workspaces', 'no_demo_in_export_packs'],
+    blockingChecks: [],
+    warningChecks: ['no_demo_in_modules', 'no_demo_in_blueprints'],
+    passThreshold: 80,
+    criticalFailureConditions: [],
+  },
+  {
+    id: 'agentSafety',
+    label: 'Agent Safety',
+    description: 'Confirms all agents are advisory only with no autonomy, file editing, or external API auto-calls.',
+    requiredChecks: ['agents_advisory_only', 'no_autonomy', 'no_file_editing', 'no_external_api_auto_calls', 'no_destructive_actions', 'recommendations_do_not_mutate'],
+    blockingChecks: ['no_autonomy', 'no_external_api_auto_calls', 'no_destructive_actions'],
+    warningChecks: ['agents_advisory_only'],
+    passThreshold: 95,
+    criticalFailureConditions: ['agent has autonomy', 'agent auto-calls external API'],
+  },
+  {
+    id: 'transformation',
+    label: 'Transformation System',
+    description: 'Confirms the transformation compiler is non-destructive, skeleton plans do not write files, and locks are active.',
+    requiredChecks: ['compiler_non_destructive', 'skeleton_plans_no_file_writes', 'transformation_locks_exist', 'readiness_scoring_present', 'plan_export_sanitised', 'no_final_variant_builds'],
+    blockingChecks: ['compiler_non_destructive', 'no_final_variant_builds'],
+    warningChecks: ['transformation_locks_exist'],
+    passThreshold: 90,
+    criticalFailureConditions: ['compiler performs destructive writes', 'variant build auto-executed'],
+  },
+  {
+    id: 'promptGenerator',
+    label: 'Prompt Generator',
+    description: 'Confirms prompts are manual-only, not auto-executed, and include safety scanner and completeness validator.',
+    requiredChecks: ['prompts_manual_only', 'no_prompt_auto_execution', 'safety_scanner_present', 'completeness_validator_present', 'stop_conditions_present', 'rollback_guidance_present'],
+    blockingChecks: ['no_prompt_auto_execution'],
+    warningChecks: ['stop_conditions_present', 'rollback_guidance_present'],
+    passThreshold: 90,
+    criticalFailureConditions: ['prompt auto-executes'],
+  },
+  {
+    id: 'workspaces',
+    label: 'Workspace Isolation',
+    description: 'Confirms workspaces are isolated, link by ID only, and do not mutate source records.',
+    requiredChecks: ['workspace_isolation_active', 'links_by_id_only', 'no_source_record_mutation', 'comparison_read_only', 'progress_manual_only', 'workspace_export_sanitised'],
+    blockingChecks: ['no_source_record_mutation'],
+    warningChecks: ['workspace_isolation_active'],
+    passThreshold: 90,
+    criticalFailureConditions: ['workspace mutates source record'],
+  },
+  {
+    id: 'exportHandoff',
+    label: 'Export / Handoff',
+    description: 'Confirms export packs are sanitised, no-secrets guard is active, and no automatic deployment is wired.',
+    requiredChecks: ['export_packs_sanitised', 'no_secrets_guard_active', 'handoff_instructions_valid', 'builder_tool_templates_exist', 'env_example_placeholders', 'no_auto_deployment', 'no_github_auto_push', 'no_vercel_auto_connect'],
+    blockingChecks: ['no_auto_deployment', 'no_github_auto_push', 'no_vercel_auto_connect', 'no_secrets_guard_active'],
+    warningChecks: ['handoff_instructions_valid'],
+    passThreshold: 90,
+    criticalFailureConditions: ['auto-deployment wired', 'secrets guard disabled'],
+  },
+  {
+    id: 'dashboardPwa',
+    label: 'Dashboard + PWA Architecture',
+    description: 'Confirms every future variant supports a professional dashboard and a connected role-specific PWA.',
+    requiredChecks: ['dashboard_pwa_rules_exist', 'variant_patterns_include_both', 'monitoring_relationship_defined', 'state_separation_defined', 'supabase_sync_boundary_defined'],
+    blockingChecks: [],
+    warningChecks: ['variant_patterns_include_both', 'monitoring_relationship_defined'],
+    passThreshold: 75,
+    criticalFailureConditions: [],
+  },
+  {
+    id: 'pwa',
+    label: 'PWA Readiness',
+    description: 'Confirms manifest exists, has required fields, and responsive layout is supported.',
+    requiredChecks: ['manifest_exists', 'manifest_fields_valid', 'responsive_layout_supported', 'installable_readiness_plan', 'offline_strategy_boundary'],
+    blockingChecks: ['manifest_exists'],
+    warningChecks: ['manifest_fields_valid', 'installable_readiness_plan'],
+    passThreshold: 80,
+    criticalFailureConditions: ['manifest missing'],
+  },
+  {
+    id: 'buildReadiness',
+    label: 'Build Readiness',
+    description: 'Confirms package.json, README, build command, no required backend, and zip handoff readiness.',
+    requiredChecks: ['package_json_exists', 'build_command_documented', 'readme_exists', 'no_required_backend', 'no_required_api_keys', 'zip_handoff_ready'],
+    blockingChecks: ['package_json_exists'],
+    warningChecks: ['readme_exists', 'zip_handoff_ready'],
+    passThreshold: 85,
+    criticalFailureConditions: ['package.json missing'],
+  },
+];
+
+export const AUDIT_CATEGORY_MAP = Object.fromEntries(AUDIT_CATEGORIES.map(c => [c.id, c]));
+
+export function getAuditCategory(id) {
+  return AUDIT_CATEGORY_MAP[id] || null;
+}
+
+export function getAllAuditCategoryIds() {
+  return AUDIT_CATEGORIES.map(c => c.id);
+}
+
+export const OVERALL_PASS_THRESHOLD  = 85;
+export const OVERALL_READY_THRESHOLD = 90;
