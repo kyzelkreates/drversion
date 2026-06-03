@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, Settings, Database, Shield, RefreshCw, Check } from 'lucide-react';
-import { getSettings, updateSettings } from '../../lib/carelinkDb.js';
+import { getSettings, updateSettings, isDemoDataEnabled, setDemoDataEnabled, seedFullDemoData, clearDemoData } from '../../lib/carelinkDb.js';
 import { getBackendStatus, testSupabaseConnection, connectSupabase, setLocalMode } from '../../lib/supabaseAdapter.js';
 import SAFETY_TEXT from '../../config/medicalSafetyText.js';
 import APP_BRANDING from '../../config/appBranding.js';
@@ -13,6 +13,8 @@ export function BackendSettings({ onNavigate }) {
   const [testResult, setTestResult] = useState(null);
   const [saved, setSaved] = useState(false);
   const [clinicalCode, setClinicalCode] = useState(settings.clinicalAccessCode || '');
+  const [demoEnabled, setDemoEnabled] = useState(isDemoDataEnabled());
+  const [demoMsg, setDemoMsg] = useState('');
   const [patientCode, setPatientCode] = useState(settings.patientAccessCode || '');
 
   function refresh() {
@@ -39,6 +41,27 @@ export function BackendSettings({ onNavigate }) {
     refresh();
   }
 
+
+  function handleDemoToggle(newVal) {
+    setDemoEnabled(newVal);
+    const result = setDemoDataEnabled(newVal);
+    if (newVal) {
+      setDemoMsg('✓ Demo data seeded — 2 demo patients with 7 days of data, flags & notes loaded.');
+    } else {
+      setDemoMsg('✓ Demo data cleared — all real patient data preserved.');
+    }
+    setTimeout(() => setDemoMsg(''), 4000);
+    setRefresh(r => r + 1);
+  }
+
+  function handleResetDemo() {
+    clearDemoData();
+    seedFullDemoData();
+    setDemoEnabled(true);
+    setDemoMsg('✓ Demo data reset to default state.');
+    setTimeout(() => setDemoMsg(''), 3000);
+    setRefresh(r => r + 1);
+  }
   function handleSaveCodes() {
     updateSettings({ clinicalAccessCode: clinicalCode.trim(), patientAccessCode: patientCode.trim() });
     setSaved(true);
@@ -143,6 +166,49 @@ export function BackendSettings({ onNavigate }) {
         }}>
           {saved ? <><Check size={13} /> Saved</> : 'Save Codes'}
         </button>
+      </div>
+
+
+      {/* Demo data toggle */}
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '14px', padding: '20px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+          <div>
+            <h3 style={{ color: 'var(--text-primary)', margin: '0 0 4px', fontSize: '14px', fontWeight: 700 }}>Demo Data</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: 0 }}>
+              {demoEnabled ? 'Demo data is ON — 2 fictional patients with full history visible to all views.' : 'Demo data is OFF — only real patient records are shown.'}
+            </p>
+          </div>
+          {/* Toggle switch */}
+          <button
+            onClick={() => handleDemoToggle(!demoEnabled)}
+            style={{
+              width: '48px', height: '26px', borderRadius: '13px', border: 'none', cursor: 'pointer',
+              background: demoEnabled ? 'var(--gold-bright)' : 'var(--bg-secondary)',
+              position: 'relative', transition: 'background 0.2s', flexShrink: 0,
+              outline: demoEnabled ? '1px solid var(--border-gold)' : '1px solid var(--border-card)',
+            }}
+            title={demoEnabled ? 'Turn off demo data' : 'Turn on demo data'}
+          >
+            <span style={{
+              position: 'absolute', top: '3px',
+              left: demoEnabled ? '25px' : '3px',
+              width: '20px', height: '20px', borderRadius: '50%',
+              background: demoEnabled ? '#0a0a0a' : 'var(--text-muted)',
+              transition: 'left 0.2s',
+            }} />
+          </button>
+        </div>
+        {demoEnabled && (
+          <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+            <button onClick={handleResetDemo} style={{ padding: '7px 14px', background: 'var(--bg-secondary)', border: '1px solid var(--border-card)', borderRadius: '8px', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '11px' }}>
+              ↺ Reset Demo Data
+            </button>
+            <span style={{ color: 'var(--text-muted)', fontSize: '11px', alignSelf: 'center' }}>
+              Alex Morgan (recovering) · Jordan Lee (flagged)
+            </span>
+          </div>
+        )}
+        {demoMsg && <p style={{ color: 'var(--green-mid)', fontSize: '12px', margin: '10px 0 0' }}>{demoMsg}</p>}
       </div>
 
       {/* Privacy notice */}

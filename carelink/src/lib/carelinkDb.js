@@ -36,6 +36,7 @@ function createEmptyDb() {
       syncStatus:    'idle',
       clinicalAccessCode: 'CARE2024',
       patientAccessCode:  'PATIENT001',
+      demoDataEnabled:    true,
     },
     audit: {
       createdAt: nowIso(),
@@ -123,6 +124,162 @@ export function updateSettings(updates) {
   db.appSettings = { ...db.appSettings, ...updates };
   saveDb(db);
   return db.appSettings;
+}
+
+
+// ─── Demo Data Toggle Helpers ─────────────────────────────────────────
+
+export function isDemoDataEnabled() {
+  return getSettings().demoDataEnabled !== false; // default true
+}
+
+export function setDemoDataEnabled(enabled) {
+  updateSettings({ demoDataEnabled: !!enabled });
+  if (enabled) {
+    seedFullDemoData();
+  } else {
+    clearDemoData();
+  }
+}
+
+/**
+ * Seed a rich demo data set:
+ * - 2 demo patients
+ * - 7 days of check-ins each
+ * - Symptoms, recovery updates, medication notes
+ * - Pre-seeded risk flags
+ */
+export function seedFullDemoData() {
+  const db = loadDb();
+
+  // Remove existing demo records first so we don't duplicate
+  db.patients         = db.patients.filter(p => !p._demo);
+  db.checkIns         = db.checkIns.filter(c => !c._demo);
+  db.checkInAnswers   = db.checkInAnswers.filter(a => !a._demo);
+  db.symptomReports   = db.symptomReports.filter(s => !s._demo);
+  db.recoveryUpdates  = db.recoveryUpdates.filter(r => !r._demo);
+  db.medicationNotes  = db.medicationNotes.filter(m => !m._demo);
+  db.riskFlags        = db.riskFlags.filter(f => !f._demo);
+  db.careTeamNotes    = db.careTeamNotes.filter(n => !n._demo);
+
+  const today = new Date();
+  const dayAgo = (n) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - n);
+    return d.toISOString().slice(0, 10);
+  };
+  const isoAgo = (n) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - n);
+    return d.toISOString();
+  };
+
+  // Demo patient 1 — recovering well
+  const p1 = { id: 'demo-p1', displayName: 'Alex Morgan', patientReference: 'DEMO-001', recoveryType: 'Post-Op', startDate: dayAgo(14), status: 'active', accessCode: 'PATIENT001', lastCheckInAt: isoAgo(1), _demo: true };
+  // Demo patient 2 — flagged/concerning
+  const p2 = { id: 'demo-p2', displayName: 'Jordan Lee', patientReference: 'DEMO-002', recoveryType: 'Orthopaedic', startDate: dayAgo(21), status: 'active', accessCode: 'PATIENT002', lastCheckInAt: isoAgo(3), _demo: true };
+
+  db.patients.push(p1, p2);
+
+  // Check-ins for p1 — improving over 7 days (pain 7→3)
+  const p1Pains   = [7, 6, 6, 5, 4, 4, 3];
+  const p1Moods   = [2, 3, 3, 4, 4, 5, 5];
+  const p1Risks   = ['medium','medium','medium','low','low','low','low'];
+  const p1Scores  = [24, 20, 19, 14, 12, 10, 9];
+
+  p1Pains.forEach((pain, i) => {
+    const date = dayAgo(6 - i);
+    const ciId = `demo-ci1-${i}`;
+    db.checkIns.push({
+      id: ciId, patientId: 'demo-p1', date,
+      submittedAt: isoAgo(6 - i),
+      riskLevel: p1Risks[i],
+      totalSeverityScore: p1Scores[i],
+      answers: [
+        { questionId: 'q1', questionText: 'How would you rate your overall wellbeing?', answerValue: p1Moods[i], severityScore: 5 - p1Moods[i] },
+        { questionId: 'q2', questionText: 'Pain level (0–10)?', answerValue: pain, severityScore: Math.ceil(pain / 2) },
+        { questionId: 'q3', questionText: 'Any urgent concerns?', answerValue: i < 2 ? 'Mild soreness' : 'None', severityScore: i < 2 ? 2 : 0 },
+        { questionId: 'q4', questionText: 'How is your sleep?', answerValue: i < 3 ? 'Disrupted' : 'Good', severityScore: i < 3 ? 2 : 0 },
+        { questionId: 'q5', questionText: 'How is your appetite?', answerValue: i < 2 ? 'Poor' : 'Normal', severityScore: i < 2 ? 2 : 0 },
+      ],
+      _demo: true,
+    });
+  });
+
+  // Check-ins for p2 — worsening (pain 4→8), missed last 3 days
+  const p2Pains  = [4, 5, 6, 7, 8];
+  const p2Risks  = ['low','medium','medium','high','urgent_review'];
+  const p2Scores = [10, 15, 19, 25, 32];
+
+  p2Pains.forEach((pain, i) => {
+    const date = dayAgo(6 - i);
+    if (6 - i < 3) return; // missed last 3 days
+    const ciId = `demo-ci2-${i}`;
+    db.checkIns.push({
+      id: ciId, patientId: 'demo-p2', date,
+      submittedAt: isoAgo(6 - i),
+      riskLevel: p2Risks[i],
+      totalSeverityScore: p2Scores[i],
+      answers: [
+        { questionId: 'q1', questionText: 'How would you rate your overall wellbeing?', answerValue: 5 - i, severityScore: i },
+        { questionId: 'q2', questionText: 'Pain level (0–10)?', answerValue: pain, severityScore: Math.ceil(pain / 2) },
+        { questionId: 'q3', questionText: 'Any urgent concerns?', answerValue: i >= 3 ? 'Sharp pain when moving' : 'None', severityScore: i >= 3 ? 5 : 0 },
+        { questionId: 'q4', questionText: 'How is your sleep?', answerValue: i >= 2 ? 'Very disrupted' : 'Ok', severityScore: i >= 2 ? 3 : 0 },
+        { questionId: 'q5', questionText: 'How is your appetite?', answerValue: i >= 3 ? 'None' : 'Reduced', severityScore: i >= 3 ? 3 : 1 },
+      ],
+      _demo: true,
+    });
+  });
+
+  // Symptom reports
+  db.symptomReports.push(
+    { id: 'demo-s1', patientId: 'demo-p1', symptomTitle: 'Incision site soreness', symptomDescription: 'Mild soreness around the wound area', bodyArea: 'Abdomen', severity: 2, createdAt: isoAgo(6), _demo: true },
+    { id: 'demo-s2', patientId: 'demo-p2', symptomTitle: 'Sharp knee pain', symptomDescription: 'Sudden sharp pain when attempting to bend knee beyond 30°', bodyArea: 'Left knee', severity: 5, createdAt: isoAgo(4), _demo: true },
+    { id: 'demo-s3', patientId: 'demo-p2', symptomTitle: 'Swelling increased', symptomDescription: 'Noticeable increase in swelling around joint', bodyArea: 'Left knee', severity: 4, createdAt: isoAgo(3), _demo: true }
+  );
+
+  // Recovery updates
+  db.recoveryUpdates.push(
+    { id: 'demo-r1', patientId: 'demo-p1', recoveryStatus: 'progressing_well', mobilityStatus: 'Limited but improving', sleepStatus: 'Good', appetiteStatus: 'Good', painLevel: 3, notes: 'Feeling much better than last week.', createdAt: isoAgo(1), _demo: true },
+    { id: 'demo-r2', patientId: 'demo-p2', recoveryStatus: 'needs_attention', mobilityStatus: 'Very limited', sleepStatus: 'Poor', appetiteStatus: 'Poor', painLevel: 8, notes: 'Struggling to complete physiotherapy exercises.', createdAt: isoAgo(3), _demo: true }
+  );
+
+  // Medication notes
+  db.medicationNotes.push(
+    { id: 'demo-m1', patientId: 'demo-p1', note: 'Taking prescribed anti-inflammatories as directed. No side effects noted.', hasConcern: false, createdAt: isoAgo(5), _demo: true },
+    { id: 'demo-m2', patientId: 'demo-p2', note: 'Missed 2 doses of prescribed pain relief this week.', hasConcern: true, createdAt: isoAgo(3), _demo: true }
+  );
+
+  // Risk flags
+  db.riskFlags.push(
+    { id: 'demo-f1', patientId: 'demo-p2', riskLevel: 'urgent_review', reason: 'Pain trend severely worsening (4→8 over 5 days)', evidence: 'Check-in scores: 10, 15, 19, 25, 32', recommendedActionLabel: 'Contact patient immediately — clinical review required', reviewed: false, reviewNote: '', createdAt: isoAgo(0), checkInId: 'demo-ci2-4', _demo: true },
+    { id: 'demo-f2', patientId: 'demo-p2', riskLevel: 'high', reason: 'Patient missed 3 consecutive check-ins', evidence: 'No submission on ' + [dayAgo(2), dayAgo(1), dayAgo(0)].join(', '), recommendedActionLabel: 'Follow up with patient or next-of-kin', reviewed: false, reviewNote: '', createdAt: isoAgo(0), _demo: true },
+    { id: 'demo-f3', patientId: 'demo-p2', riskLevel: 'high', reason: 'Reported missed medication doses', evidence: 'Medication note flagged concern', recommendedActionLabel: 'Review medication compliance and reasons', reviewed: false, reviewNote: '', createdAt: isoAgo(3), _demo: true }
+  );
+
+  // Care team notes
+  db.careTeamNotes.push(
+    { id: 'demo-n1', patientId: 'demo-p1', text: 'Post-op review scheduled for next week. Patient progressing as expected.', createdBy: 'Dr. S. Patel', createdAt: isoAgo(4), _demo: true },
+    { id: 'demo-n2', patientId: 'demo-p2', text: 'Attempted phone contact — no answer. Left voicemail. Will try again tomorrow.', createdBy: 'Nurse Williams', createdAt: isoAgo(2), _demo: true }
+  );
+
+  saveDb(db);
+  return { patients: 2, checkIns: db.checkIns.filter(c => c._demo).length, flags: 3 };
+}
+
+/**
+ * Remove all records tagged _demo: true
+ * Leaves real patient data intact
+ */
+export function clearDemoData() {
+  const db = loadDb();
+  const tables = ['patients','checkIns','checkInAnswers','symptomReports','recoveryUpdates','medicationNotes','riskFlags','careTeamNotes','reports'];
+  tables.forEach(t => {
+    if (Array.isArray(db[t])) {
+      db[t] = db[t].filter(r => !r._demo);
+    }
+  });
+  saveDb(db);
 }
 
 // ─── Patients ─────────────────────────────────────────────────────────
@@ -275,15 +432,8 @@ export function resetCareDb() {
 // ─── Seed Demo Patient (for first-run UX) ─────────────────────────────
 
 export function seedDemoPatientIfEmpty() {
-  const patients = getPatients();
-  if (patients.length > 0) return null;
-  return createPatient({
-    displayName: 'Demo Patient',
-    patientReference: 'DEMO-001',
-    assignedClinicianId: null,
-    recoveryType: 'General',
-    startDate: new Date().toISOString().slice(0, 10),
-    status: 'active',
-    accessCode: 'PATIENT001',
-  });
+  if (!isDemoDataEnabled()) return null;
+  const demoPatients = getPatients().filter(p => p._demo);
+  if (demoPatients.length > 0) return null; // already seeded
+  return seedFullDemoData();
 }
