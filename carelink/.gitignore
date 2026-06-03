@@ -1,1 +1,10 @@
+node_modules/
+dist/
+.env
+*.local
+.DS_Store
 .agents/.env
+
+# Agent memory (personal)
+.agents/.memory/
+.agents/BOOTSTRAP.md
