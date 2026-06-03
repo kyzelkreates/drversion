@@ -27,7 +27,7 @@ import APP_BRANDING          from '../config/appBranding.js';
 import { PwaSharePanel }      from '../components/shared/PwaSharePanel.jsx';
 import { seedDemoPatientIfEmpty } from '../lib/carelinkDb.js';
 
-seedDemoPatientIfEmpty();
+try { seedDemoPatientIfEmpty(); } catch(e) { console.warn("[CareLink] demo seed failed:", e); }
 
 // ─── Mode Selector ────────────────────────────────────────────────────
 

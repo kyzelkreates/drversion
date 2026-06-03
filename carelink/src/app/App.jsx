@@ -5,7 +5,7 @@ import AppShell from '../components/layout/AppShell.jsx';
 import '../styles/globals.css';
 
 import { getState } from '../state/storage.js';
-getState();
+try { getState(); } catch(e) { console.warn("[4P3X] state init failed:", e); }
 
 // Routes that render fullscreen (no sidebar/topbar shell)
 const FULLSCREEN_ROUTES = ['/carelink'];
