@@ -1,14 +1,14 @@
-// 4P3X App Root — RUN 1 + RUN 2 + RUN 3
-// Simple internal router. Supports routeParams for passing data to pages.
-
+// 4P3X App Root
 import React, { useState } from 'react';
 import { routes, NotFound } from './routes.js';
 import AppShell from '../components/layout/AppShell.jsx';
 import '../styles/globals.css';
 
-// Initialise SSOT on app load — triggers load + validation + migration
 import { getState } from '../state/storage.js';
 getState();
+
+// Routes that render fullscreen (no sidebar/topbar shell)
+const FULLSCREEN_ROUTES = ['/carelink'];
 
 export function App() {
   const [currentRoute, setCurrentRoute] = useState('/carelink');
@@ -22,6 +22,13 @@ export function App() {
 
   const matchedRoute  = routes.find((r) => r.path === currentRoute);
   const PageComponent = matchedRoute ? matchedRoute.component : null;
+
+  // CareLink renders fullscreen — no sidebar/topbar
+  if (FULLSCREEN_ROUTES.includes(currentRoute)) {
+    return PageComponent
+      ? <PageComponent onNavigate={navigate} {...routeParams} />
+      : <NotFound onNavigate={navigate} />;
+  }
 
   return (
     <AppShell currentRoute={currentRoute} onNavigate={navigate}>

@@ -1,13 +1,17 @@
 {
-  "name": "4P3X CareLink Dashboard™",
+  "name": "4P3X CareLink Dashboard\u2122",
   "short_name": "4P3X CareLink",
-  "description": "Patient Recovery PWA + Clinical Monitoring Dashboard — Powered by 4P3X Intelligent AI",
-  "start_url": "/",
+  "description": "Patient Recovery PWA + Clinical Monitoring Dashboard \u2014 Powered by 4P3X Intelligent AI",
+  "start_url": "/#/carelink",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#f5c842",
   "orientation": "any",
-  "categories": ["medical", "health", "productivity"],
+  "categories": [
+    "medical",
+    "health",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='24' fill='%230a0a0a'/%3E%3Cpath d='M96 28 L156 54 L156 102 C156 138 96 164 96 164 C96 164 36 138 36 102 L36 54 Z' fill='%23f5c842' opacity='0.2' stroke='%23f5c842' stroke-width='3'/%3E%3Cpath d='M76 96 L88 108 L116 80' stroke='%23f5c842' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
@@ -20,5 +24,6 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "scope": "/"
 }

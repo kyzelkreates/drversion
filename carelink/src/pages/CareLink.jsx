@@ -24,6 +24,7 @@ import { BackendSettings }   from '../components/clinical/BackendSettings.jsx';
 
 import { OfflineBanner }     from '../components/shared/OfflineBanner.jsx';
 import APP_BRANDING          from '../config/appBranding.js';
+import { PwaSharePanel }      from '../components/shared/PwaSharePanel.jsx';
 import { seedDemoPatientIfEmpty } from '../lib/carelinkDb.js';
 
 seedDemoPatientIfEmpty();
@@ -31,6 +32,7 @@ seedDemoPatientIfEmpty();
 // ─── Mode Selector ────────────────────────────────────────────────────
 
 function ModeSelector({ onSelectPatient, onSelectClinical }) {
+  const [showShare, setShowShare] = React.useState(false);
   return (
     <div style={{
       minHeight: '100vh', background: 'var(--bg-primary)',
@@ -77,7 +79,20 @@ function ModeSelector({ onSelectPatient, onSelectClinical }) {
             <ChevronRight size={18} color='var(--silver-bright)' />
           </button>
         </div>
+
+        {/* Install & Share button */}
+        <button onClick={() => setShowShare(true)} style={{
+          marginTop: '18px', width: '100%', padding: '13px',
+          background: 'transparent', border: '1px solid var(--border-gold)',
+          borderRadius: '12px', color: 'var(--gold-bright)', fontWeight: 700,
+          fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', gap: '8px',
+        }}>
+          <span style={{ fontSize: '18px' }}>📲</span> Install App &amp; Share with Patients
+        </button>
       </div>
+
+      {showShare && <PwaSharePanel onClose={() => setShowShare(false)} />}
     </div>
   );
 }
@@ -88,6 +103,7 @@ function PatientShell() {
   const [patient, setPatient] = useState(null);
   const [route, setRoute]     = useState('patient-home');
   const [params, setParams]   = useState({});
+  const [shareOpen, setShareOpen] = useState(false);
 
   function navigate(r, p) { setRoute(r); setParams(p || {}); window.scrollTo(0, 0); }
   if (!patient) return <PatientAccess onLogin={setPatient} />;
@@ -100,14 +116,16 @@ function PatientShell() {
           <ShieldCheck size={18} color='var(--gold-bright)' />
           <span style={{ color: 'var(--gold-bright)', fontWeight: 700, fontSize: '14px' }}>Patient Recovery</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{patient.displayName}</span>
+          <button onClick={() => setShareOpen(true)} style={{ background: 'none', border: '1px solid var(--border-gold)', borderRadius: '6px', color: 'var(--gold-bright)', cursor: 'pointer', padding: '3px 8px', fontSize: '11px', fontWeight: 700 }} title="Install &amp; Share">📲</button>
           <button onClick={() => setPatient(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }} title="Log out">
             <LogOut size={14} />
           </button>
         </div>
       </div>
       <OfflineBanner />
+      {shareOpen && <PwaSharePanel onClose={() => setShareOpen(false)} />}
       <div style={{ paddingBottom: '32px' }}>
         {route === 'patient-home'       && <PatientHome       {...props} />}
         {route === 'patient-checkin'    && <DailyCheckIn      {...props} />}
