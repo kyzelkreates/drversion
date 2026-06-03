@@ -11,7 +11,7 @@ import { getState } from '../state/storage.js';
 getState();
 
 export function App() {
-  const [currentRoute, setCurrentRoute] = useState('/');
+  const [currentRoute, setCurrentRoute] = useState('/carelink');
   const [routeParams, setRouteParams]   = useState({});
 
   function navigate(path, params) {

@@ -39,6 +39,8 @@ export const createInitialState = () => ({
     fleet:        { enabled: false },
     monitoring:   { enabled: false },
     admin:        { enabled: false },
+    // CareLink Dashboard
+    carelink:     { enabled: true },
     reports:      { enabled: false },
     integrations: { enabled: false },
   },
@@ -55,6 +57,7 @@ export const createInitialState = () => ({
     backend:    'not_connected',
     pwa:        'ready',
     agentSystem:'ready',
+    carelink:   'ready',
   },
 
   aiSettings: {

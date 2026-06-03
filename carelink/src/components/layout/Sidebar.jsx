@@ -180,12 +180,22 @@ export function Sidebar({ currentRoute, onNavigate }) {
   return (
     <aside className="app-sidebar">
       <div className="sidebar-brand">
-        <div className="sidebar-brand-name">4P3X Base™</div>
-        <div className="sidebar-brand-sub">Powered by 4P3X Intelligent AI</div>
+        <div className="sidebar-brand-name">4P3X CareLink™</div>
+        <div className="sidebar-brand-sub">Patient Recovery + Clinical Dashboard</div>
       </div>
 
       <nav className="sidebar-nav">
-        <div className="sidebar-section-label">Navigation</div>
+        
+        <div
+          className={`sidebar-nav-item ${currentRoute === '/carelink' ? 'active' : ''}`}
+          onClick={() => onNavigate('/carelink')}
+          style={{ borderLeft: '2px solid var(--gold-bright)', marginBottom: '4px', background: currentRoute === '/carelink' ? 'rgba(245,200,66,0.12)' : 'rgba(245,200,66,0.04)', color: 'var(--gold-bright)' }}
+        >
+          <NavIcon name="ShieldCheck" />
+          <span style={{ fontWeight: 700 }}>CareLink Dashboard™</span>
+        </div>
+        <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '6px 0 10px' }} />
+<div className="sidebar-section-label">Base Tools</div>
 
         {active.map((mod) => (
           <div

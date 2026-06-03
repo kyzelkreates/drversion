@@ -1,4 +1,6 @@
 // 4P3X Route definitions — RUN 1 through RUN 9
+// CareLink Extension
+import { CareLink } from '../pages/CareLink.jsx';
 
 import { Dashboard }               from '../pages/Dashboard.jsx';
 import { Modules }                 from '../pages/Modules.jsx';
@@ -50,6 +52,8 @@ import FinalBaseCompletion                from '../pages/FinalBaseCompletion.jsx
 
 
 export const routes = [
+  { path: '/carelink', component: CareLink, label: '4P3X CareLink', icon: 'shield' },
+
   // Run 1
   { path: '/',                component: Dashboard },
   { path: '/modules',         component: Modules },

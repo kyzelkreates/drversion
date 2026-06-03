@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft, AlertCircle, Check } from 'lucide-react';
-import { createSymptomReport, correlateSymptomReport, createRiskFlag, getPatientById } from '../../lib/carelinkDb.js';
-import { correlateSymptomReport as correlate } from '../../lib/correlationEngine.js';
+import { createSymptomReport, createRiskFlag, getPatientById } from '../../lib/carelinkDb.js';
+import { correlateSymptomReport } from '../../lib/correlationEngine.js';
 
 const SEVERITY_OPTS = [
   { value: 1, label: 'Mild',    color: 'var(--green-mid)' },
@@ -35,7 +35,7 @@ export function SymptomsUpload({ patient, onNavigate }) {
     });
 
     // Run correlation
-    const flags = correlate({ patient, symptomReport: report });
+    const flags = correlateSymptomReport({ patient, symptomReport: report });
     for (const f of flags) createRiskFlag(f);
 
     setSubmitted(true);

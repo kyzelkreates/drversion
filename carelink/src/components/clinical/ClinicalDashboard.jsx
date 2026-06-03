@@ -4,10 +4,9 @@ import {
   Flag, FileText, Settings, ChevronRight, Monitor, RefreshCw
 } from 'lucide-react';
 import {
-  getPatients, getCheckIns, getRiskFlags, getUnreviewedFlags,
-  detectMissedCheckIn
+  getPatients, getCheckIns, getRiskFlags, getUnreviewedFlags
 } from '../../lib/carelinkDb.js';
-import { detectMissedCheckIn as detectMissed } from '../../lib/correlationEngine.js';
+
 import { RiskBadge } from '../shared/RiskBadge.jsx';
 import { SafetyNotice } from '../shared/SafetyNotice.jsx';
 import APP_BRANDING from '../../config/appBranding.js';
