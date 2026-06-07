@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd carelink && npm install --legacy-peer-deps && npm run build",
+  "outputDirectory": "carelink/dist",
+  "installCommand": "echo 'skip root install'"
+}
