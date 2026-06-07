@@ -1,0 +1,15 @@
+{
+  "name": "CareSignal OS™",
+  "short_name": "CareSignal OS",
+  "description": "CareSignal OS™ — Doctor, patient, recovery, and support monitoring platform. Powered by 4P3X Intelligent AI™ Created by Kyzel Kreates™",
+  "start_url": "https://drversion.vercel.app/",
+  "scope": "https://drversion.vercel.app/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#f5c842",
+  "orientation": "any",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
