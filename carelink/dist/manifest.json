@@ -1,29 +1,15 @@
 {
-  "name": "4P3X CareLink Dashboard\u2122",
-  "short_name": "4P3X CareLink",
-  "description": "Patient Recovery PWA + Clinical Monitoring Dashboard \u2014 Powered by 4P3X Intelligent AI",
-  "start_url": "/#/carelink",
+  "name": "CareSignal OS™",
+  "short_name": "CareSignal OS",
+  "description": "CareSignal OS™ — Doctor, patient, recovery, and support monitoring platform. Powered by 4P3X Intelligent AI™ Created by Kyzel Kreates™",
+  "start_url": "https://drversion.vercel.app/",
+  "scope": "https://drversion.vercel.app/",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#f5c842",
   "orientation": "any",
-  "categories": [
-    "medical",
-    "health",
-    "productivity"
-  ],
   "icons": [
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='24' fill='%230a0a0a'/%3E%3Cpath d='M96 28 L156 54 L156 102 C156 138 96 164 96 164 C96 164 36 138 36 102 L36 54 Z' fill='%23f5c842' opacity='0.2' stroke='%23f5c842' stroke-width='3'/%3E%3Cpath d='M76 96 L88 108 L116 80' stroke='%23f5c842' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='64' fill='%230a0a0a'/%3E%3Cpath d='M256 64 L416 128 L416 272 C416 368 256 448 256 448 C256 448 96 368 96 272 L96 128 Z' fill='%23f5c842' opacity='0.2' stroke='%23f5c842' stroke-width='8'/%3E%3Cpath d='M200 256 L232 288 L312 208' stroke='%23f5c842' stroke-width='16' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ],
-  "scope": "/"
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
 }
