@@ -113,7 +113,7 @@ function Hero({ onDash, onPwa }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '12px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00ff88', display: 'inline-block', boxShadow: '0 0 8px #00ff8866' }} />
-          <span style={{ color: '#555', fontSize: '12px' }}>drversion.vercel.app — live deployed</span>
+          <span style={{ color: '#555', fontSize: '12px' }}>kyzelkreates.github.io/drversion — live deployed</span>
         </div>
       </div>
     </section>
