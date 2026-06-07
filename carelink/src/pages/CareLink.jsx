@@ -179,8 +179,8 @@ function ClinicalShell() {
 
 // ─── CareLink Page Export ─────────────────────────────────────────────
 
-export function CareLink() {
-  const [mode, setMode] = useState(null);
+export function CareLink({ initialMode }) {
+  const [mode, setMode] = useState(initialMode || null);
 
   if (!mode)               return <ModeSelector onSelectPatient={() => setMode('patient')} onSelectClinical={() => setMode('clinical')} />;
   if (mode === 'patient')  return <PatientShell />;

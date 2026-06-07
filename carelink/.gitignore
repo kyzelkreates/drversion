@@ -8,3 +8,4 @@ dist/
 # Agent memory (personal)
 .agents/.memory/
 .agents/BOOTSTRAP.md
+dist/
